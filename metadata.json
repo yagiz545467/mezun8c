@@ -1,0 +1,6 @@
+{
+  "name": "8C Mezuniyet 2026",
+  "description": "8C sınıfı 2026 mezuniyet töreni için özel, modern, mobil uyumlu canlı fotoğraf çekimi ve mezuniyet defteri uygulaması.",
+  "requestFramePermissions": ["camera", "microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
