@@ -105,7 +105,7 @@ export default function GalleryTab({
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
                 ) : (
                   <div className="relative w-full h-full">
-                    <img src={memory.mediaUrl} alt={memory.studentName}
+                    <video src={memory.mediaUrl} muted playsinline
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
                     <div className="absolute inset-0 flex items-center justify-center bg-black/30">
                       <Film className="h-8 w-8 text-white" />
