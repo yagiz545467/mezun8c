@@ -1,5 +1,5 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { getTurso, initDatabase } from './turso';
+import { getTurso, initDatabase } from './_lib/turso';
 
 const INITIAL_STUDENTS = [
   { id: 'std-1', name: 'MİRAÇ HALİM TANRIKULU', gender: 'M' },
