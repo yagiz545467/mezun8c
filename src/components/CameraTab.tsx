@@ -171,7 +171,6 @@ export default function CameraTab({
       await onAddMemory(capturedMedia, capturedType);
       setUploadSuccess(true);
       setCapturedMedia(null);
-      setTimeout(() => setActiveTab('gallery'), 1500);
     } catch (err) {
       setErrorMessage('Kaydedilemedi.');
     } finally {
