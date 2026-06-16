@@ -94,21 +94,23 @@ export default function AuthBar({
           </nav>
 
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 rounded-lg border border-[#1e1e32] bg-[#0f0f1a] px-2.5 py-1">
-              <Clock className="h-3 w-3 text-indigo-400" />
-              <select
-                value={timeMachineDate}
-                onChange={(e) => setTimeMachineDate(e.target.value)}
-                className="bg-transparent font-mono text-[11px] font-semibold text-slate-300 focus:outline-none cursor-pointer"
-              >
-                <option value="2026-06-16" className="bg-[#0f0f1a] text-slate-300">16.06.2026 (Öncesi)</option>
-                <option value="2026-06-19" className="bg-[#0f0f1a] text-slate-300">19.06.2026 07:00 (Kamera Açık)</option>
-                <option value="2026-06-20" className="bg-[#0f0f1a] text-slate-300">19.06.2026 10:00 (Galeri Açık)</option>
-              </select>
-              <button onClick={() => setShowTimeHelp(!showTimeHelp)} className="text-slate-500 hover:text-indigo-400 transition-colors cursor-pointer">
-                <HelpCircle className="h-3 w-3" />
-              </button>
-            </div>
+              {isAdmin && (
+              <div className="flex items-center gap-1.5 rounded-lg border border-[#1e1e32] bg-[#0f0f1a] px-2.5 py-1">
+                <Clock className="h-3 w-3 text-indigo-400" />
+                <select
+                  value={timeMachineDate}
+                  onChange={(e) => setTimeMachineDate(e.target.value)}
+                  className="bg-transparent font-mono text-[11px] font-semibold text-slate-300 focus:outline-none cursor-pointer"
+                >
+                  <option value="2026-06-16" className="bg-[#0f0f1a] text-slate-300">16.06.2026 (Öncesi)</option>
+                  <option value="2026-06-19" className="bg-[#0f0f1a] text-slate-300">19.06.2026 07:00 (Kamera Açık)</option>
+                  <option value="2026-06-20" className="bg-[#0f0f1a] text-slate-300">19.06.2026 10:00 (Galeri Açık)</option>
+                </select>
+                <button onClick={() => setShowTimeHelp(!showTimeHelp)} className="text-slate-500 hover:text-indigo-400 transition-colors cursor-pointer">
+                  <HelpCircle className="h-3 w-3" />
+                </button>
+              </div>
+            )}
 
             {user ? (
               <div className="flex items-center gap-2">
