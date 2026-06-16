@@ -297,7 +297,7 @@ export default function App() {
   const isAdmin = !!user && user.email === ADMIN_EMAIL;
 
   const stats = {
-    totalStudents: students.length,
+    totalStudents: students.filter(s => !s.isTeacher).length,
     totalNotes: notes.length,
     totalMemories: memories.length,
   };
