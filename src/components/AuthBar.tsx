@@ -165,6 +165,56 @@ export default function AuthBar({
         </AnimatePresence>
       </header>
 
+      {/* Mobile Top Header */}
+      <header className="md:hidden sticky top-0 z-40 w-full border-b border-[#1e1e32] bg-[#0a0a14]/80 backdrop-blur-xl">
+        <div className="flex items-center justify-between px-3 py-2">
+          <div className="flex items-center gap-2" onClick={() => setActiveTab('home')}>
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/20">
+              <Sparkles className="h-3 w-3" />
+            </div>
+            <span className="font-serif text-sm font-bold text-white">8C Mezuniyet</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {user ? (
+              <>
+                {currentUserStudent ? (
+                  <div className="text-right">
+                    <p className="text-[10px] font-semibold text-white leading-tight truncate max-w-[100px]">
+                      {currentUserStudent.name}
+                    </p>
+                    <p className="text-[8px] text-indigo-400 font-medium">
+                      {currentUserStudent.isTeacher
+                        ? (currentUserStudent.isApproved ? 'Hoca' : 'Onay Bekliyor')
+                        : (currentUserStudent.isApproved ? 'Öğrenci' : 'Onay Bekliyor')}
+                    </p>
+                  </div>
+                ) : (
+                  <button onClick={() => setShowClaimModal(true)} className="text-[10px] text-rose-400 hover:text-rose-300 transition-colors cursor-pointer underline">
+                    Profil Eşleştir
+                  </button>
+                )}
+                {user.photoURL ? (
+                  <img src={user.photoURL} alt="" className="h-7 w-7 rounded-full border border-[#1e1e32]" />
+                ) : (
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-500/20 text-indigo-300 font-bold text-xs border border-indigo-500/30 uppercase">
+                    {getInitials(user.displayName || 'U')}
+                  </div>
+                )}
+                <button onClick={onLogout} className="cursor-pointer rounded-lg p-1 text-slate-500 hover:bg-[#1a1a2e] hover:text-rose-400 transition-all">
+                  <LogOut className="h-3.5 w-3.5" />
+                </button>
+              </>
+            ) : (
+              <button onClick={onLogin} className="cursor-pointer flex items-center gap-1.5 rounded-lg bg-indigo-500 hover:bg-indigo-400 px-3 py-1 text-[10px] font-semibold text-white transition-all shadow-lg shadow-indigo-500/20">
+                <LogIn className="h-3 w-3" />
+                Giriş Yap
+              </button>
+            )}
+          </div>
+        </div>
+      </header>
+
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0a0a14]/95 backdrop-blur-xl border-t border-[#1e1e32] px-2 pb-1 pt-1">
         <div className="flex items-center justify-around max-w-lg mx-auto">

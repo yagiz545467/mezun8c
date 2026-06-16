@@ -317,7 +317,7 @@ export default function App() {
         isAdmin={isAdmin}
       />
 
-      <main className="flex-1 mx-auto w-full max-w-7xl px-4 py-4 md:px-6 md:py-6 relative z-10 pb-28 md:pb-6">
+      <main className="flex-1 mx-auto w-full max-w-7xl px-4 pt-12 pb-28 md:px-6 md:py-6 md:pb-6 relative z-10">
         {isLoading ? (
           <div className="flex h-[60vh] flex-col items-center justify-center gap-4">
             <div className="relative">
