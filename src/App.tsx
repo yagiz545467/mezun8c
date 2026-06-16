@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useGoogleLogin, googleLogout } from '@react-oauth/google';
 import { Student, GraduationNote, MemoryMedia } from './types';
 import {
   getStudents, upsertStudent, getNotes, createNote, deleteNote,
@@ -112,8 +111,32 @@ export default function App() {
   };
 
   useEffect(() => {
-    const saved = loadUser();
-    if (saved) setUser(saved);
+    const hash = window.location.hash;
+    if (hash && hash.includes('access_token')) {
+      const params = new URLSearchParams(hash.replace('#', ''));
+      const accessToken = params.get('access_token');
+      if (accessToken) {
+        fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        })
+          .then(res => res.json())
+          .then(info => {
+            const appUser: AppUser = {
+              uid: info.sub,
+              displayName: info.name || '',
+              email: info.email || '',
+              photoURL: info.picture || null,
+            };
+            setUser(appUser);
+            saveUser(appUser);
+          })
+          .catch(console.error);
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    } else {
+      const saved = loadUser();
+      if (saved) setUser(saved);
+    }
     loadData();
   }, []);
 
@@ -137,33 +160,15 @@ export default function App() {
     } catch { /* fallback */ }
   };
 
-  const login = useGoogleLogin({
-    flow: 'implicit',
-    onSuccess: async (tokenResponse) => {
-      try {
-        const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-        });
-        const info = await res.json();
-        const appUser: AppUser = {
-          uid: info.sub,
-          displayName: info.name || '',
-          email: info.email || '',
-          photoURL: info.picture || null,
-        };
-        setUser(appUser);
-        saveUser(appUser);
-      } catch (err) {
-        console.error('Login error:', err);
-      }
-    },
-    onError: () => console.error('Google login failed'),
-  });
-
-  const handleLogin = () => login();
+  const handleLogin = () => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    const redirectUri = window.location.origin;
+    const scope = 'openid profile email';
+    const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=${encodeURIComponent(scope)}&include_granted_scopes=true`;
+    window.location.href = url;
+  };
 
   const handleLogout = () => {
-    googleLogout();
     setUser(null);
     setCurrentUserStudent(null);
     clearUser();
