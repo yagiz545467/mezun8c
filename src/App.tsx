@@ -277,14 +277,16 @@ export default function App() {
     } catch { /* fallback */ }
   };
 
-  const handleAddMemory = async (base64Data: string, mediaType: 'image' | 'video' = 'image') => {
+  const handleAddMemory = async (mediaUrl: string, mediaType: 'image' | 'video' = 'image', localBase64?: string) => {
     if (!user || !currentUserStudent) return;
+    const id = 'memory_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     const newMemory: MemoryMedia = {
-      id: 'memory_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+      id,
       studentId: currentUserStudent.id,
       studentName: currentUserStudent.name,
       userUid: user.uid,
-      mediaUrl: base64Data,
+      mediaUrl,
+      localBase64,
       mediaType,
       createdAt: Date.now(),
     };

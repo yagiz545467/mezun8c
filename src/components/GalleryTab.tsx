@@ -1,5 +1,5 @@
 import { Student, MemoryMedia } from '../types';
-import { Lock, Clock, Search, Trash2, Camera, User, Sparkles, Image, Film, X } from 'lucide-react';
+import { Lock, Clock, Search, Trash2, Camera, User, Sparkles, Image, Film, X, WifiOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useState } from 'react';
 import { getAvatarColor, formatDate } from '../lib/utils';
@@ -102,10 +102,12 @@ export default function GalleryTab({
               >
                 {memory.mediaType === 'image' ? (
                   <img src={memory.mediaUrl} alt={memory.studentName}
+                    onError={(e) => { if (memory.localBase64) (e.target as HTMLImageElement).src = memory.localBase64; }}
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
                 ) : (
                   <div className="relative w-full h-full">
-                    <video src={memory.mediaUrl} muted playsinline
+                    <video src={memory.mediaUrl} muted playsInline
+                      onError={(e) => { if (memory.localBase64) (e.target as HTMLVideoElement).src = memory.localBase64; }}
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
                     <div className="absolute inset-0 flex items-center justify-center bg-black/30">
                       <Film className="h-8 w-8 text-white" />
@@ -163,9 +165,11 @@ export default function GalleryTab({
 
               {selectedPhoto.mediaType === 'image' ? (
                 <img src={selectedPhoto.mediaUrl} alt={selectedPhoto.studentName}
+                  onError={(e) => { if (selectedPhoto.localBase64) (e.target as HTMLImageElement).src = selectedPhoto.localBase64; }}
                   className="w-full max-h-[80vh] object-contain rounded-lg" />
               ) : (
                 <video src={selectedPhoto.mediaUrl} controls
+                  onError={(e) => { if (selectedPhoto.localBase64) (e.target as HTMLVideoElement).src = selectedPhoto.localBase64; }}
                   className="w-full max-h-[80vh] rounded-lg" />
               )}
 

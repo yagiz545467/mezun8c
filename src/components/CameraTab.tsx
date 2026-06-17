@@ -3,11 +3,13 @@ import { Camera, Lock, Clock, RefreshCw, Sparkles, Check, AlertTriangle, ShieldC
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useRef, useEffect } from 'react';
 
+const VDS_URL = import.meta.env.VITE_VDS_URL || 'http://212.180.120.242:3001';
+
 interface CameraTabProps {
   currentUserStudent: Student | null;
   user: any;
   timeMachineDate: string;
-  onAddMemory: (base64Data: string, mediaType: 'image' | 'video') => Promise<void>;
+  onAddMemory: (mediaUrl: string, mediaType: 'image' | 'video', localBase64?: string) => Promise<void>;
   onLogin: () => void;
   setActiveTab: (tab: 'home' | 'notes' | 'camera' | 'gallery') => void;
 }
@@ -165,15 +167,30 @@ export default function CameraTab({
 
   const toggleFacing = () => setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
 
+  const uploadToVDS = async (base64: string): Promise<string> => {
+    const res = await fetch(`${VDS_URL}/api/upload`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ base64 }),
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`VDS upload failed: ${res.status} ${text}`);
+    }
+    const data = await res.json();
+    return data.url;
+  };
+
   const handleSaveMedia = async () => {
     if (!capturedMedia) return;
     setIsUploading(true);
     try {
-      await onAddMemory(capturedMedia, capturedType);
+      const url = await uploadToVDS(capturedMedia);
+      await onAddMemory(url, capturedType, capturedMedia);
       setUploadSuccess(true);
       setCapturedMedia(null);
     } catch (err) {
-      setErrorMessage('Kaydedilemedi.');
+      setErrorMessage('Kaydedilemedi. VDS bağlantısını kontrol edin.');
     } finally {
       setIsUploading(false);
     }

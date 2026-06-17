@@ -25,6 +25,7 @@ export interface MemoryMedia {
   studentName: string;
   userUid: string;
   mediaUrl: string;
+  localBase64?: string;
   mediaType: 'image' | 'video';
   createdAt: number;
 }
