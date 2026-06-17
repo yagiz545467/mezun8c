@@ -3,7 +3,13 @@ import { Camera, Lock, Clock, RefreshCw, Sparkles, Check, AlertTriangle, ShieldC
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useRef, useEffect } from 'react';
 
-const VDS_URL = import.meta.env.VITE_VDS_URL || 'https://212.180.120.242:3443';
+const getVdsUrl = () => {
+  const env = import.meta.env.VITE_VDS_URL;
+  if (env) return env;
+  if (window.location.port === '3001') return window.location.origin;
+  return 'http://212.180.120.242:3001';
+};
+const VDS_URL = getVdsUrl();
 
 interface CameraTabProps {
   currentUserStudent: Student | null;

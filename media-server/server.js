@@ -1,24 +1,22 @@
 import express from 'express';
 import cors from 'cors';
-import https from 'https';
 import http from 'http';
 import { randomUUID } from 'crypto';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { writeFile, mkdir } from 'fs/promises';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import selfsigned from 'selfsigned';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const MEDIA_DIR = join(__dirname, 'media');
-const CERT_DIR = join(__dirname, 'certs');
-const HTTP_PORT = process.env.HTTP_PORT || 3001;
-const HTTPS_PORT = process.env.HTTPS_PORT || 3443;
+const DIST_DIR = join(__dirname, 'dist');
+const PORT = process.env.PORT || 3001;
+const API_UPSTREAM = 'https://mezun8c.vercel.app';
 
 const app = express();
 
 app.use(cors());
 app.use(express.json({ limit: '100mb' }));
+
 app.use('/media', express.static(MEDIA_DIR));
 
 app.post('/api/upload', async (req, res) => {
@@ -37,8 +35,7 @@ app.post('/api/upload', async (req, res) => {
     await mkdir(MEDIA_DIR, { recursive: true });
     await writeFile(filepath, Buffer.from(data, 'base64'));
 
-    const protocol = req.socket.encrypted ? 'https' : 'http';
-    const url = `${protocol}://${req.get('host')}/media/${filename}`;
+    const url = `http://${req.get('host')}/media/${filename}`;
     res.json({ url, filename });
   } catch (err) {
     console.error('Upload error:', err);
@@ -50,46 +47,31 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
 
-function ensureCert() {
-  const keyPath = join(CERT_DIR, 'key.pem');
-  const certPath = join(CERT_DIR, 'cert.pem');
-
-  if (existsSync(keyPath) && existsSync(certPath)) {
-    return { key: readFileSync(keyPath), cert: readFileSync(certPath) };
+const proxyTarget = `${API_UPSTREAM}/api`;
+app.all('/api/*', async (req, res) => {
+  try {
+    const path = req.path;
+    const targetUrl = `${proxyTarget}${path === '/api' ? '' : path.substring(4)}`;
+    const headers = { 'Content-Type': 'application/json' };
+    const body = ['GET', 'HEAD'].includes(req.method) ? undefined : JSON.stringify(req.body);
+    const upstream = await fetch(targetUrl, { method: req.method, headers, body });
+    const data = await upstream.json();
+    res.status(upstream.status).json(data);
+  } catch (err) {
+    console.error('Proxy error:', err.message);
+    res.status(502).json({ error: 'Upstream unavailable' });
   }
-
-  console.log('Generating self-signed certificate...');
-  const attrs = [{ name: 'commonName', value: '212.180.120.242' }];
-  const { private: keyPem, cert: certPem } = selfsigned.generate(attrs, {
-    keySize: 2048,
-    days: 365,
-    algorithm: 'sha256',
-    extensions: [
-      { name: 'basicConstraints', cA: true },
-      { name: 'subjectAltName', altNames: [{ type: 2, value: '212.180.120.242' }] },
-    ],
-  });
-
-  mkdir(CERT_DIR, { recursive: true }).then(() => {
-    writeFileSync(keyPath, keyPem);
-    writeFileSync(certPath, certPem);
-  });
-
-  return { key: keyPem, cert: certPem };
-}
-
-http.createServer(app).listen(HTTP_PORT, () => {
-  console.log(`HTTP server running on port ${HTTP_PORT}`);
 });
 
-try {
-  const httpsOpts = ensureCert();
-  https.createServer(httpsOpts, app).listen(HTTPS_PORT, () => {
-    console.log(`HTTPS server running on port ${HTTPS_PORT}`);
-  });
-} catch (err) {
-  console.error('Could not start HTTPS server:', err.message);
-  console.log('Falling back to HTTP only. Update VDS_URL in CameraTab to use HTTP.');
-}
+app.use(express.static(DIST_DIR));
 
-console.log(`Serving files from: ${MEDIA_DIR}`);
+app.get('*', (_req, res) => {
+  res.sendFile(join(DIST_DIR, 'index.html'));
+});
+
+http.createServer(app).listen(PORT, () => {
+  console.log(`Server running on http://0.0.0.0:${PORT}`);
+  console.log(`Serving frontend from: ${DIST_DIR}`);
+  console.log(`Serving media from: ${MEDIA_DIR}`);
+  console.log(`Proxying /api/* -> ${API_UPSTREAM}`);
+});
