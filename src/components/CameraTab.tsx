@@ -30,6 +30,7 @@ export default function CameraTab({
   const [recordingDuration, setRecordingDuration] = useState(0);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const mobileVideoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
@@ -187,9 +188,9 @@ export default function CameraTab({
   }, [isUnlockedDay, user, currentUserStudent, facingMode, mode]);
 
   useEffect(() => {
-    if (stream && videoRef.current) {
-      videoRef.current.srcObject = stream;
-    }
+    if (!stream) return;
+    if (videoRef.current) videoRef.current.srcObject = stream;
+    if (mobileVideoRef.current) mobileVideoRef.current.srcObject = stream;
   }, [stream, cameraActive]);
 
   const formatDuration = (s: number) => {
@@ -305,12 +306,33 @@ export default function CameraTab({
             <div className="flex-1 relative overflow-hidden">
               {cameraActive && !capturedMedia && (
                 <video
-                  ref={videoRef}
+                  ref={mobileVideoRef}
                   autoPlay
                   playsInline
                   muted={true}
                   className={`absolute inset-0 h-full w-full object-cover ${facingMode === 'user' ? 'scale-x-[-1]' : ''}`}
                 />
+              )}
+
+              {capturedMedia && capturedType === 'image' && (
+                <img src={capturedMedia} alt="" className="absolute inset-0 h-full w-full object-cover" />
+              )}
+
+              {capturedMedia && capturedType === 'video' && (
+                <video src={capturedMedia} controls className="absolute inset-0 h-full w-full object-cover" />
+              )}
+
+              {!cameraActive && !capturedMedia && !stream && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center space-y-3">
+                    <Camera className="h-14 w-14 text-slate-600 mx-auto" />
+                    <p className="text-sm text-slate-500">Kamera kapalı</p>
+                    <button onClick={startCamera}
+                      className="cursor-pointer bg-indigo-500 hover:bg-indigo-400 text-white py-2.5 px-8 font-bold rounded-lg text-sm transition-colors shadow-lg shadow-indigo-500/30">
+                      Kamerayı Aç
+                    </button>
+                  </div>
+                </div>
               )}
 
               {capturedMedia && capturedType === 'image' && (
