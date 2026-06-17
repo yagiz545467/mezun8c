@@ -2,12 +2,14 @@ import express from 'express';
 import cors from 'cors';
 import http from 'http';
 import { randomUUID } from 'crypto';
+import { readFileSync, writeFileSync, rmSync, existsSync } from 'fs';
 import { writeFile, mkdir } from 'fs/promises';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const MEDIA_DIR = join(__dirname, 'media');
+const CHUNKS_DIR = join(__dirname, 'media', '.chunks');
 const DIST_DIR = join(__dirname, 'dist');
 const PORT = process.env.PORT || 3001;
 const API_UPSTREAM = 'https://mezun8c.vercel.app';
@@ -40,6 +42,47 @@ app.post('/api/upload', async (req, res) => {
   } catch (err) {
     console.error('Upload error:', err);
     res.status(500).json({ error: 'Upload failed' });
+  }
+});
+
+app.post('/api/upload-chunk', async (req, res) => {
+  try {
+    const { id, index, chunk } = req.body;
+    if (!id || index === undefined || !chunk) {
+      return res.status(400).json({ error: 'Missing id, index, or chunk' });
+    }
+    const chunkDir = join(CHUNKS_DIR, id);
+    await mkdir(chunkDir, { recursive: true });
+    await writeFile(join(chunkDir, `${index}`), Buffer.from(chunk, 'base64'));
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Chunk upload error:', err);
+    res.status(500).json({ error: 'Chunk upload failed' });
+  }
+});
+
+app.post('/api/upload-chunk/finalize', async (req, res) => {
+  try {
+    const { id, total, ext } = req.body;
+    if (!id || total === undefined || !ext) {
+      return res.status(400).json({ error: 'Missing id, total, or ext' });
+    }
+    const chunkDir = join(CHUNKS_DIR, id);
+    const parts = [];
+    for (let i = 0; i < total; i++) {
+      const p = join(chunkDir, `${i}`);
+      if (!existsSync(p)) return res.status(400).json({ error: `Missing chunk ${i}` });
+      parts.push(readFileSync(p));
+    }
+    const data = Buffer.concat(parts);
+    const filename = `${id}.${ext}`;
+    await writeFile(join(MEDIA_DIR, filename), data);
+    rmSync(chunkDir, { recursive: true, force: true });
+    const url = `${req.protocol}://${req.get('host')}/media/${filename}`;
+    res.json({ url, filename });
+  } catch (err) {
+    console.error('Finalize error:', err);
+    res.status(500).json({ error: 'Finalize failed' });
   }
 });
 

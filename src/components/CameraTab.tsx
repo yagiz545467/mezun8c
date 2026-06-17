@@ -168,16 +168,43 @@ export default function CameraTab({
   const toggleFacing = () => setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
 
   const uploadToVDS = async (base64: string): Promise<string> => {
-    const res = await fetch(`${VDS_URL}/api/upload`, {
+    try {
+      const res = await fetch(`${VDS_URL}/api/upload`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ base64 }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return data.url;
+      }
+    } catch {}
+
+    const matches = base64.match(/^data:(image\/(\w+)|video\/(\w+));base64,(.+)$/);
+    if (!matches) throw new Error('Invalid base64');
+    const ext = matches[2] || matches[3];
+    const raw = matches[4];
+    const id = 'chunk_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    const chunkSize = 3 * 1024 * 1024;
+    const total = Math.ceil(raw.length / chunkSize);
+
+    for (let i = 0; i < total; i++) {
+      const chunk = raw.slice(i * chunkSize, (i + 1) * chunkSize);
+      const res = await fetch('/api/upload-chunk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, index: i, chunk }),
+      });
+      if (!res.ok) throw new Error(`Chunk ${i} failed`);
+    }
+
+    const finalRes = await fetch('/api/upload-chunk/finalize', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ base64 }),
+      body: JSON.stringify({ id, total, ext }),
     });
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`VDS upload failed: ${res.status} ${text}`);
-    }
-    const data = await res.json();
+    if (!finalRes.ok) throw new Error('Finalize failed');
+    const data = await finalRes.json();
     return data.url;
   };
 
