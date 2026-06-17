@@ -1,20 +1,15 @@
-import { createClient } from '@libsql/client';
-import { tursoConfig } from './db-config';
+import { createClient } from '@libsql/client/web';
+
+const DB_URL = 'libsql://8c-graduation-celestial-capricorn-tffyvy.aws-us-east-2.turso.io';
+const DB_TOKEN = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3ODE2MzU2NTksImlkIjoiMDE5ZWQxYzItOTgwMS03ZDM4LWE4MGEtNDU1YWVmNmRlZmIwIiwicmlkIjoiZjQzZjJmMGItZDljNC00MmI4LWFkYmQtOTAwYzg3NDcxYTM3In0.hLmc5b84GXpAbgqLVlXv5rKHUJVVbaUtYChyzOedqADGh-8lcBTDRP9WOoK5ZLeZplOFwQtBZ9QMAFFZt5B6Aw';
 
 let client: ReturnType<typeof createClient> | null = null;
 
 export function getTurso() {
   if (!client) {
-    const url = process.env.TURSO_DATABASE_URL || tursoConfig.url;
-    const authToken = process.env.TURSO_AUTH_TOKEN || tursoConfig.authToken;
-
-    if (!url) {
-      throw new Error('TURSO_DATABASE_URL environment variable is not set');
-    }
-
     client = createClient({
-      url,
-      authToken,
+      url: process.env.TURSO_DATABASE_URL || DB_URL,
+      authToken: process.env.TURSO_AUTH_TOKEN || DB_TOKEN,
     });
   }
   return client;
