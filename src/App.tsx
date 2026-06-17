@@ -55,6 +55,7 @@ const DEFAULT_STUDENTS: Student[] = [
   { id: 'tcr-7', name: 'DUYGU HOCA', gender: 'F', isTeacher: true },
   { id: 'tcr-8', name: 'ERKAN HOCA', gender: 'M', isTeacher: true },
   { id: 'tcr-9', name: 'MEHIBE HOCA', gender: 'F', isTeacher: true },
+  { id: 'tcr-10', name: 'EMRE HOCA', gender: 'M', isTeacher: true },
 ];
 const STORAGE_PREFIX = '8c_';
 
@@ -194,6 +195,7 @@ export default function App() {
     const updated: Student = {
       ...target,
       claimedByUid: user.uid,
+      email: user.email || target.email,
       isApproved: false,
     };
 

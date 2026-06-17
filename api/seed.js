@@ -39,6 +39,7 @@ const INITIAL_STUDENTS = [
   { id: 'tcr-7', name: 'DUYGU HOCA', gender: 'F', is_teacher: true },
   { id: 'tcr-8', name: 'ERKAN HOCA', gender: 'M', is_teacher: true },
   { id: 'tcr-9', name: 'MEHIBE HOCA', gender: 'F', is_teacher: true },
+  { id: 'tcr-10', name: 'EMRE HOCA', gender: 'M', is_teacher: true },
 ];
 
 export default async function handler(req, res) {

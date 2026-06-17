@@ -117,10 +117,11 @@ export default function AdminPanelTab({
                       <div className="h-9 w-9 flex items-center justify-center font-bold text-xs rounded-lg bg-violet-500/15 text-violet-300 border border-violet-500/20">
                         {getInitials(t.name)}
                       </div>
-                      <div>
-                        <p className="text-sm font-semibold text-white">{t.name}</p>
-                        <p className="font-mono text-[8px] text-slate-500">UID: {t.claimedByUid?.substring(0, 10)}...</p>
-                      </div>
+                        <div>
+                          <p className="text-sm font-semibold text-white">{t.name}</p>
+                          <p className="font-mono text-[8px] text-slate-500">{t.email || 'Email yok'}</p>
+                          <p className="font-mono text-[8px] text-slate-600">UID: {t.claimedByUid?.substring(0, 10)}...</p>
+                        </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <button onClick={() => onApproveTeacher(t.id, true)}
@@ -148,7 +149,10 @@ export default function AdminPanelTab({
               <div className="space-y-1 max-h-40 overflow-y-auto">
                 {approvedTeachers.map(t => (
                   <div key={t.id} className="flex items-center justify-between text-xs bg-[#0a0a14] p-2 rounded-lg border border-[#1e1e32]">
-                    <span className="text-slate-300">{t.name}</span>
+                    <div>
+                      <span className="text-slate-300">{t.name}</span>
+                      {t.email && <span className="text-slate-500 ml-2 text-[9px]">{t.email}</span>}
+                    </div>
                     <button onClick={() => onClearClaim(t.id)}
                       className="text-rose-400 hover:bg-rose-500/10 px-2 py-0.5 rounded text-[9px] border border-rose-500/20 cursor-pointer">
                       Kaldır
@@ -189,7 +193,8 @@ export default function AdminPanelTab({
                         </div>
                         <div>
                           <p className="text-sm font-semibold text-white">{s.name}</p>
-                          <p className="font-mono text-[8px] text-slate-500">UID: {s.claimedByUid?.substring(0, 10)}...</p>
+                          <p className="font-mono text-[8px] text-slate-500">{s.email || 'Email yok'}</p>
+                          <p className="font-mono text-[8px] text-slate-600">UID: {s.claimedByUid?.substring(0, 10)}...</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -221,6 +226,7 @@ export default function AdminPanelTab({
                   <tr className="text-slate-500 font-mono text-[9px] uppercase border-b border-[#1e1e32]">
                     <th className="p-2 font-medium">ID</th>
                     <th className="p-2 font-medium">İsim</th>
+                    <th className="p-2 font-medium">E-posta</th>
                     <th className="p-2 font-medium">Cinsiyet</th>
                     <th className="p-2 font-medium">UID</th>
                     <th className="p-2 font-medium text-right">İşlem</th>
@@ -232,6 +238,7 @@ export default function AdminPanelTab({
                       <tr key={st.id} className="hover:bg-[#0a0a14]/50">
                         <td className="p-2 font-mono text-[10px]">{st.id}</td>
                         <td className="p-2 font-semibold text-white">{st.name}</td>
+                        <td className="p-2 font-mono text-[9px] text-slate-400">{st.email || '-'}</td>
                         <td className="p-2">{st.gender === 'F' ? 'Kız' : 'Erkek'}</td>
                         <td className="p-2 font-mono text-[9px] text-slate-500">{st.claimedByUid?.substring(0, 14)}...</td>
                         <td className="p-2 text-right">
@@ -243,7 +250,7 @@ export default function AdminPanelTab({
                       </tr>
                     ))
                   ) : (
-                    <tr><td colSpan={5} className="text-center py-6 text-slate-500">Henüz onaylanmış öğrenci yok.</td></tr>
+                    <tr><td colSpan={6} className="text-center py-6 text-slate-500">Henüz onaylanmış öğrenci yok.</td></tr>
                   )}
                 </tbody>
               </table>

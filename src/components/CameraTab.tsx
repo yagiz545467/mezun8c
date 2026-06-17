@@ -246,9 +246,26 @@ export default function CameraTab({
     );
   }
 
+  if (!currentUserStudent.isApproved) {
+    return (
+      <div className="py-12 max-w-lg mx-auto text-center space-y-6">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-amber-500/20 bg-amber-500/5 text-amber-400">
+          <AlertTriangle className="h-6 w-6" />
+        </div>
+        <div className="space-y-2">
+          <h2 className="font-serif text-xl font-bold text-white">Onay Bekliyor</h2>
+          <p className="text-xs text-slate-400">
+            Profiliniz henüz onaylanmadı. Kamera kullanımı için yöneticinizin profilinizi onaylaması gerekiyor.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="py-2 md:py-6 max-w-xl mx-auto">
-      <div className="text-center space-y-1 mb-4">
+    <div className="md:py-6 md:max-w-xl md:mx-auto">
+      {/* Desktop Header */}
+      <div className="hidden md:block text-center space-y-1 mb-4">
         <div className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[9px] font-mono font-bold px-2.5 py-0.5">
           <ShieldCheck className="h-3 w-3" /> CANLI ÇEKİM
         </div>
@@ -257,7 +274,7 @@ export default function CameraTab({
       </div>
 
       {errorMessage && (
-        <div className="bg-rose-500/10 text-rose-300 text-xs py-2 px-3 rounded-xl border border-rose-500/20 text-center mb-4">
+        <div className="bg-rose-500/10 text-rose-300 text-xs py-2 px-3 rounded-xl border border-rose-500/20 text-center mb-4 md:block hidden">
           {errorMessage}
         </div>
       )}
@@ -275,125 +292,253 @@ export default function CameraTab({
       <canvas ref={canvasRef} className="hidden" />
 
       {!uploadSuccess && (
-        <div className="bg-[#0f0f1a] border border-[#1e1e32] p-4 rounded-xl space-y-4">
-          {/* Video Preview */}
-          <div className="relative aspect-[4/3] w-full bg-black rounded-lg overflow-hidden border border-[#1e1e32] flex items-center justify-center">
-            {cameraActive && !capturedMedia && (
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted={true}
-                className={`h-full w-full object-cover ${facingMode === 'user' ? 'scale-x-[-1]' : ''}`}
-              />
-            )}
-
-            {capturedMedia && capturedType === 'image' && (
-              <img src={capturedMedia} alt="Captured" className="w-full h-full object-cover" />
-            )}
-
-            {capturedMedia && capturedType === 'video' && (
-              <video src={capturedMedia} controls className="w-full h-full object-cover" />
-            )}
-
-            {!cameraActive && !capturedMedia && (
-              <div className="text-center p-6 space-y-3">
-                <Camera className="h-10 w-10 text-slate-600 mx-auto" />
-                <p className="text-xs text-slate-500">Kamera hazır değil</p>
-                <button onClick={startCamera}
-                  className="bg-indigo-500 hover:bg-indigo-400 text-white py-1.5 px-4 font-bold rounded-lg text-xs transition-colors">
-                  Kamerayı Aç
-                </button>
+        <>
+          {/* Mobile Fullscreen Camera */}
+          <div className="md:hidden fixed inset-0 z-50 bg-black flex flex-col">
+            {errorMessage && (
+              <div className="absolute top-4 left-4 right-4 z-10 bg-rose-500/20 text-rose-300 text-xs py-2 px-3 rounded-xl border border-rose-500/30 text-center">
+                {errorMessage}
               </div>
             )}
 
-            {isRecording && (
-              <div className="absolute top-3 left-3 flex items-center gap-2 bg-black/60 px-2.5 py-1 rounded-full">
-                <div className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-                <span className="text-white text-xs font-mono">{formatDuration(recordingDuration)}</span>
-              </div>
-            )}
+            <div className="flex-1 relative overflow-hidden">
+              {cameraActive && !capturedMedia && (
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  muted={true}
+                  className={`absolute inset-0 h-full w-full object-cover ${facingMode === 'user' ? 'scale-x-[-1]' : ''}`}
+                />
+              )}
 
-            {cameraActive && !capturedMedia && !isRecording && mode === 'photo' && (
-              <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                <div className="h-24 w-24 border border-dashed border-white/10 rounded-full" />
-              </div>
-            )}
-          </div>
+              {capturedMedia && capturedType === 'image' && (
+                <img src={capturedMedia} alt="" className="absolute inset-0 h-full w-full object-cover" />
+              )}
 
-          {/* Mode Switcher */}
-          {cameraActive && !capturedMedia && !isRecording && (
-            <div className="flex items-center justify-center gap-2">
-              <button onClick={() => setMode('photo')}
-                className={`cursor-pointer flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium transition-all ${
-                  mode === 'photo'
-                    ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20'
-                    : 'bg-[#0a0a14] text-slate-400 border border-[#1e1e32] hover:border-indigo-500/30'
-                }`}>
-                <Image className="h-4 w-4" />
-                Fotoğraf
-              </button>
-              <button onClick={() => setMode('video')}
-                className={`cursor-pointer flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium transition-all ${
-                  mode === 'video'
-                    ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20'
-                    : 'bg-[#0a0a14] text-slate-400 border border-[#1e1e32] hover:border-rose-500/30'
-                }`}>
-                <Video className="h-4 w-4" />
-                Video
-              </button>
+              {capturedMedia && capturedType === 'video' && (
+                <video src={capturedMedia} controls className="absolute inset-0 h-full w-full object-cover" />
+              )}
+
+              {!cameraActive && !capturedMedia && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center space-y-3">
+                    <Camera className="h-12 w-12 text-slate-600 mx-auto" />
+                    <p className="text-xs text-slate-500">Kamera hazır değil</p>
+                    <button onClick={startCamera}
+                      className="bg-indigo-500 hover:bg-indigo-400 text-white py-2 px-6 font-bold rounded-lg text-sm transition-colors">
+                      Kamerayı Aç
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {isRecording && (
+                <div className="absolute top-6 left-6 flex items-center gap-2 bg-black/60 px-3 py-1.5 rounded-full">
+                  <div className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                  <span className="text-white text-sm font-mono">{formatDuration(recordingDuration)}</span>
+                </div>
+              )}
+
+              {cameraActive && !capturedMedia && !isRecording && mode === 'photo' && (
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                  <div className="h-32 w-32 border border-dashed border-white/10 rounded-full" />
+                </div>
+              )}
             </div>
-          )}
 
-          {/* Controls */}
-          <div className="flex items-center justify-center gap-4">
-            {cameraActive && !capturedMedia && (
-              <button onClick={toggleFacing}
-                className="cursor-pointer p-2.5 rounded-xl bg-[#0a0a14] border border-[#1e1e32] text-slate-400 hover:text-white hover:border-slate-600 transition-all"
-                title="Kamerayı Döndür">
-                <RefreshCw className="h-4 w-4" />
-              </button>
-            )}
+            {/* Mobile Controls Overlay */}
+            <div className="bg-black/80 px-6 py-6">
+              {cameraActive && !capturedMedia && !isRecording && (
+                <div className="flex items-center justify-center gap-6 mb-4">
+                  <button onClick={() => setMode('photo')}
+                    className={`flex items-center gap-1.5 px-5 py-2 rounded-full text-sm font-medium transition-all ${
+                      mode === 'photo'
+                        ? 'bg-indigo-500 text-white'
+                        : 'text-slate-400'
+                    }`}>
+                    <Image className="h-4 w-4" />
+                    Foto
+                  </button>
+                  <button onClick={() => setMode('video')}
+                    className={`flex items-center gap-1.5 px-5 py-2 rounded-full text-sm font-medium transition-all ${
+                      mode === 'video'
+                        ? 'bg-rose-500 text-white'
+                        : 'text-slate-400'
+                    }`}>
+                    <Video className="h-4 w-4" />
+                    Video
+                  </button>
+                </div>
+              )}
 
-            {cameraActive && !capturedMedia && mode === 'photo' && (
-              <button onClick={capturePhoto}
-                className="cursor-pointer flex h-14 w-14 items-center justify-center rounded-full border-4 border-white bg-rose-500 hover:bg-rose-400 shadow-lg transition-transform hover:scale-105 active:scale-95">
-                <div className="h-5 w-5 rounded-full border-2 border-white" />
-              </button>
-            )}
+              <div className="flex items-center justify-center gap-8">
+                {cameraActive && !capturedMedia && (
+                  <button onClick={toggleFacing}
+                    className="p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all"
+                    title="Kamerayı Döndür">
+                    <RefreshCw className="h-5 w-5" />
+                  </button>
+                )}
 
-            {cameraActive && !capturedMedia && mode === 'video' && !isRecording && (
-              <button onClick={startRecording}
-                className="cursor-pointer flex h-14 w-14 items-center justify-center rounded-full border-4 border-white bg-rose-500 hover:bg-rose-400 shadow-lg transition-transform hover:scale-105 active:scale-95">
-                <Play className="h-5 w-5 text-white ml-0.5" />
-              </button>
-            )}
+                {cameraActive && !capturedMedia && mode === 'photo' && (
+                  <button onClick={capturePhoto}
+                    className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-white/10 hover:bg-white/20 transition-transform active:scale-95">
+                    <div className="h-7 w-7 rounded-full border-2 border-white" />
+                  </button>
+                )}
 
-            {isRecording && (
-              <button onClick={stopRecording}
-                className="cursor-pointer flex h-14 w-14 items-center justify-center rounded-full border-4 border-white bg-slate-800 hover:bg-slate-700 shadow-lg transition-transform hover:scale-105 active:scale-95">
-                <Square className="h-5 w-5 text-white" />
-              </button>
-            )}
+                {cameraActive && !capturedMedia && mode === 'video' && !isRecording && (
+                  <button onClick={startRecording}
+                    className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-rose-500 hover:bg-rose-400 transition-transform active:scale-95">
+                    <Play className="h-6 w-6 text-white ml-0.5" />
+                  </button>
+                )}
 
-            {capturedMedia && (
-              <div className="flex items-center gap-3 w-full">
-                <button onClick={startCamera}
-                  className="cursor-pointer flex-1 py-3 text-xs bg-[#0a0a14] border border-[#1e1e32] hover:bg-[#1a1a2e] text-slate-300 rounded-lg transition-all">
-                  Yeniden Çek
+                {isRecording && (
+                  <button onClick={stopRecording}
+                    className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-slate-800 hover:bg-slate-700 transition-transform active:scale-95">
+                    <Square className="h-6 w-6 text-white" />
+                  </button>
+                )}
+
+                {capturedMedia && (
+                  <div className="flex items-center gap-4 w-full">
+                    <button onClick={startCamera}
+                      className="flex-1 py-3 text-sm bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all">
+                      Yeniden Çek
+                    </button>
+                    <button onClick={handleSaveMedia} disabled={isUploading}
+                      className="flex-1 py-3 text-sm bg-indigo-500 hover:bg-indigo-400 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-500/20 disabled:opacity-50">
+                      {isUploading ? 'Kaydediliyor...' : 'Albüme Ekle'}
+                    </button>
+                  </div>
+                )}
+
+                {cameraActive && !capturedMedia && mode === 'photo' && <div className="w-12" />}
+                {cameraActive && !capturedMedia && mode === 'video' && !isRecording && <div className="w-12" />}
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop Camera Card */}
+          <div className="hidden md:block bg-[#0f0f1a] border border-[#1e1e32] p-4 rounded-xl space-y-4">
+            <div className="relative aspect-[4/3] w-full bg-black rounded-lg overflow-hidden border border-[#1e1e32] flex items-center justify-center">
+              {cameraActive && !capturedMedia && (
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  muted={true}
+                  className={`h-full w-full object-cover ${facingMode === 'user' ? 'scale-x-[-1]' : ''}`}
+                />
+              )}
+
+              {capturedMedia && capturedType === 'image' && (
+                <img src={capturedMedia} alt="" className="w-full h-full object-cover" />
+              )}
+
+              {capturedMedia && capturedType === 'video' && (
+                <video src={capturedMedia} controls className="w-full h-full object-cover" />
+              )}
+
+              {!cameraActive && !capturedMedia && (
+                <div className="text-center p-6 space-y-3">
+                  <Camera className="h-10 w-10 text-slate-600 mx-auto" />
+                  <p className="text-xs text-slate-500">Kamera hazır değil</p>
+                  <button onClick={startCamera}
+                    className="bg-indigo-500 hover:bg-indigo-400 text-white py-1.5 px-4 font-bold rounded-lg text-xs transition-colors">
+                    Kamerayı Aç
+                  </button>
+                </div>
+              )}
+
+              {isRecording && (
+                <div className="absolute top-3 left-3 flex items-center gap-2 bg-black/60 px-2.5 py-1 rounded-full">
+                  <div className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                  <span className="text-white text-xs font-mono">{formatDuration(recordingDuration)}</span>
+                </div>
+              )}
+
+              {cameraActive && !capturedMedia && !isRecording && mode === 'photo' && (
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                  <div className="h-24 w-24 border border-dashed border-white/10 rounded-full" />
+                </div>
+              )}
+            </div>
+
+            {cameraActive && !capturedMedia && !isRecording && (
+              <div className="flex items-center justify-center gap-2">
+                <button onClick={() => setMode('photo')}
+                  className={`cursor-pointer flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium transition-all ${
+                    mode === 'photo'
+                      ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20'
+                      : 'bg-[#0a0a14] text-slate-400 border border-[#1e1e32] hover:border-indigo-500/30'
+                  }`}>
+                  <Image className="h-4 w-4" />
+                  Fotoğraf
                 </button>
-                <button onClick={handleSaveMedia} disabled={isUploading}
-                  className="cursor-pointer flex-1 py-3 text-xs bg-indigo-500 hover:bg-indigo-400 text-white font-bold rounded-lg transition-all shadow-lg shadow-indigo-500/20 disabled:opacity-50">
-                  {isUploading ? 'Kaydediliyor...' : 'Albüme Ekle'}
+                <button onClick={() => setMode('video')}
+                  className={`cursor-pointer flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium transition-all ${
+                    mode === 'video'
+                      ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20'
+                      : 'bg-[#0a0a14] text-slate-400 border border-[#1e1e32] hover:border-rose-500/30'
+                  }`}>
+                  <Video className="h-4 w-4" />
+                  Video
                 </button>
               </div>
             )}
-          </div>
 
-          <p className="text-[8px] text-slate-600 text-center leading-normal">
-            * Tamamen tarayıcı içinde işlem yapılır. Hiçbir harici dosya seçilemez.
-          </p>
-        </div>
+            <div className="flex items-center justify-center gap-4">
+              {cameraActive && !capturedMedia && (
+                <button onClick={toggleFacing}
+                  className="cursor-pointer p-2.5 rounded-xl bg-[#0a0a14] border border-[#1e1e32] text-slate-400 hover:text-white hover:border-slate-600 transition-all"
+                  title="Kamerayı Döndür">
+                  <RefreshCw className="h-4 w-4" />
+                </button>
+              )}
+
+              {cameraActive && !capturedMedia && mode === 'photo' && (
+                <button onClick={capturePhoto}
+                  className="cursor-pointer flex h-14 w-14 items-center justify-center rounded-full border-4 border-white bg-rose-500 hover:bg-rose-400 shadow-lg transition-transform hover:scale-105 active:scale-95">
+                  <div className="h-5 w-5 rounded-full border-2 border-white" />
+                </button>
+              )}
+
+              {cameraActive && !capturedMedia && mode === 'video' && !isRecording && (
+                <button onClick={startRecording}
+                  className="cursor-pointer flex h-14 w-14 items-center justify-center rounded-full border-4 border-white bg-rose-500 hover:bg-rose-400 shadow-lg transition-transform hover:scale-105 active:scale-95">
+                  <Play className="h-5 w-5 text-white ml-0.5" />
+                </button>
+              )}
+
+              {isRecording && (
+                <button onClick={stopRecording}
+                  className="cursor-pointer flex h-14 w-14 items-center justify-center rounded-full border-4 border-white bg-slate-800 hover:bg-slate-700 shadow-lg transition-transform hover:scale-105 active:scale-95">
+                  <Square className="h-5 w-5 text-white" />
+                </button>
+              )}
+
+              {capturedMedia && (
+                <div className="flex items-center gap-3 w-full">
+                  <button onClick={startCamera}
+                    className="cursor-pointer flex-1 py-3 text-xs bg-[#0a0a14] border border-[#1e1e32] hover:bg-[#1a1a2e] text-slate-300 rounded-lg transition-all">
+                    Yeniden Çek
+                  </button>
+                  <button onClick={handleSaveMedia} disabled={isUploading}
+                    className="cursor-pointer flex-1 py-3 text-xs bg-indigo-500 hover:bg-indigo-400 text-white font-bold rounded-lg transition-all shadow-lg shadow-indigo-500/20 disabled:opacity-50">
+                    {isUploading ? 'Kaydediliyor...' : 'Albüme Ekle'}
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <p className="text-[8px] text-slate-600 text-center leading-normal">
+              * Tamamen tarayıcı içinde işlem yapılır. Hiçbir harici dosya seçilemez.
+            </p>
+          </div>
+        </>
       )}
     </div>
   );
