@@ -37,3 +37,14 @@ export function formatDateTime(ts: number): string {
 export function generateId(prefix: string): string {
   return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
+
+export function getMediaUrl(url: string): string {
+  if (!url || url.startsWith('data:')) return url;
+  const isHttps = window.location.protocol === 'https:';
+  const vdsPrefix = 'http://212.180.120.242:3001/media/';
+  if (isHttps && url.startsWith(vdsPrefix)) {
+    const filename = url.slice(vdsPrefix.length);
+    return `/api/media?file=${encodeURIComponent(filename)}`;
+  }
+  return url;
+}
