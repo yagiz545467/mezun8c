@@ -1,5 +1,5 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { getTurso, initDatabase } from './_lib/turso';
+import { initDatabase, select, execute } from './_lib/turso';
 
 const INITIAL_STUDENTS = [
   { id: 'std-1', name: 'MİRAÇ HALİM TANRIKULU', gender: 'M' },
@@ -47,32 +47,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     await initDatabase();
-    const turso = getTurso();
 
-    const existing = await turso.execute('SELECT COUNT(*) as count FROM students');
-    const count = Number(existing.rows[0]?.count || 0);
+    const existing = await select('SELECT COUNT(*) as count FROM students');
+    const count = Number(existing[0]?.count || 0);
 
     if (count > 0) {
       return res.status(200).json({ message: 'Database already seeded', count });
     }
 
     for (const student of INITIAL_STUDENTS) {
-      await turso.execute({
-        sql: `INSERT INTO students (id, name, email, photo_url, gender, claimed_by_uid, is_teacher, is_approved)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        args: [
-          student.id, student.name, null, null, student.gender || null,
-          null, student.is_teacher ? 1 : 0, 0,
-        ],
-      });
+      await execute(`INSERT INTO students (id, name, email, photo_url, gender, claimed_by_uid, is_teacher, is_approved)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, [
+        student.id, student.name, null, null, student.gender || null,
+        null, student.is_teacher ? 1 : 0, 0,
+      ]);
     }
 
-    // Set default settings
-    await turso.execute({
-      sql: `INSERT INTO settings (id, value) VALUES (?, ?)
-            ON CONFLICT(id) DO NOTHING`,
-      args: ['isNotebookPublic', 'false'],
-    });
+    await execute(`INSERT INTO settings (id, value) VALUES (?, ?) ON CONFLICT(id) DO NOTHING`, [
+      'isNotebookPublic', 'false',
+    ]);
 
     return res.status(200).json({ message: 'Database seeded successfully', count: INITIAL_STUDENTS.length });
   } catch (error) {
