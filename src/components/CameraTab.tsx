@@ -180,13 +180,14 @@ export default function CameraTab({
 
   useEffect(() => {
     if (isUnlockedDay && user && currentUserStudent && !capturedMedia && !uploadSuccess) {
-      startCamera();
+      const isMobile = window.innerWidth < 768;
+      if (!isMobile) startCamera();
     }
     return () => { stopCamera(); };
   }, [isUnlockedDay, user, currentUserStudent, facingMode, mode]);
 
   useEffect(() => {
-    if (videoRef.current && stream) {
+    if (stream && videoRef.current) {
       videoRef.current.srcObject = stream;
     }
   }, [stream, cameraActive]);
@@ -294,7 +295,7 @@ export default function CameraTab({
       {!uploadSuccess && (
         <>
           {/* Mobile Fullscreen Camera */}
-          <div className="md:hidden fixed inset-0 z-50 bg-black flex flex-col">
+          <div className="md:hidden fixed inset-0 z-[60] bg-black flex flex-col">
             {errorMessage && (
               <div className="absolute top-4 left-4 right-4 z-10 bg-rose-500/20 text-rose-300 text-xs py-2 px-3 rounded-xl border border-rose-500/30 text-center">
                 {errorMessage}
@@ -323,10 +324,23 @@ export default function CameraTab({
               {!cameraActive && !capturedMedia && (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center space-y-3">
-                    <Camera className="h-12 w-12 text-slate-600 mx-auto" />
-                    <p className="text-xs text-slate-500">Kamera hazır değil</p>
+                    <Camera className="h-14 w-14 text-slate-600 mx-auto" />
+                    <p className="text-sm text-slate-500">Kamera hazır değil</p>
                     <button onClick={startCamera}
-                      className="bg-indigo-500 hover:bg-indigo-400 text-white py-2 px-6 font-bold rounded-lg text-sm transition-colors">
+                      className="cursor-pointer bg-indigo-500 hover:bg-indigo-400 text-white py-2.5 px-8 font-bold rounded-lg text-sm transition-colors shadow-lg shadow-indigo-500/30">
+                      Kamerayı Aç
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {!stream && !cameraActive && !capturedMedia && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center space-y-3">
+                    <Camera className="h-14 w-14 text-slate-600 mx-auto" />
+                    <p className="text-sm text-slate-500">Kamera kapalı</p>
+                    <button onClick={startCamera}
+                      className="cursor-pointer bg-indigo-500 hover:bg-indigo-400 text-white py-2.5 px-8 font-bold rounded-lg text-sm transition-colors shadow-lg shadow-indigo-500/30">
                       Kamerayı Aç
                     </button>
                   </div>
@@ -348,11 +362,11 @@ export default function CameraTab({
             </div>
 
             {/* Mobile Controls Overlay */}
-            <div className="bg-black/80 px-6 py-6">
+            <div className="bg-black/80 px-6 pt-4 pb-[80px]">
               {cameraActive && !capturedMedia && !isRecording && (
                 <div className="flex items-center justify-center gap-6 mb-4">
                   <button onClick={() => setMode('photo')}
-                    className={`flex items-center gap-1.5 px-5 py-2 rounded-full text-sm font-medium transition-all ${
+                    className={`cursor-pointer flex items-center gap-1.5 px-5 py-2 rounded-full text-sm font-medium transition-all ${
                       mode === 'photo'
                         ? 'bg-indigo-500 text-white'
                         : 'text-slate-400'
@@ -361,7 +375,7 @@ export default function CameraTab({
                     Foto
                   </button>
                   <button onClick={() => setMode('video')}
-                    className={`flex items-center gap-1.5 px-5 py-2 rounded-full text-sm font-medium transition-all ${
+                    className={`cursor-pointer flex items-center gap-1.5 px-5 py-2 rounded-full text-sm font-medium transition-all ${
                       mode === 'video'
                         ? 'bg-rose-500 text-white'
                         : 'text-slate-400'
@@ -375,7 +389,7 @@ export default function CameraTab({
               <div className="flex items-center justify-center gap-8">
                 {cameraActive && !capturedMedia && (
                   <button onClick={toggleFacing}
-                    className="p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all"
+                    className="cursor-pointer p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all"
                     title="Kamerayı Döndür">
                     <RefreshCw className="h-5 w-5" />
                   </button>
@@ -383,21 +397,21 @@ export default function CameraTab({
 
                 {cameraActive && !capturedMedia && mode === 'photo' && (
                   <button onClick={capturePhoto}
-                    className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-white/10 hover:bg-white/20 transition-transform active:scale-95">
+                    className="cursor-pointer flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-white/10 hover:bg-white/20 transition-transform active:scale-95">
                     <div className="h-7 w-7 rounded-full border-2 border-white" />
                   </button>
                 )}
 
                 {cameraActive && !capturedMedia && mode === 'video' && !isRecording && (
                   <button onClick={startRecording}
-                    className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-rose-500 hover:bg-rose-400 transition-transform active:scale-95">
+                    className="cursor-pointer flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-rose-500 hover:bg-rose-400 transition-transform active:scale-95">
                     <Play className="h-6 w-6 text-white ml-0.5" />
                   </button>
                 )}
 
                 {isRecording && (
                   <button onClick={stopRecording}
-                    className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-slate-800 hover:bg-slate-700 transition-transform active:scale-95">
+                    className="cursor-pointer flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-slate-800 hover:bg-slate-700 transition-transform active:scale-95">
                     <Square className="h-6 w-6 text-white" />
                   </button>
                 )}
@@ -405,11 +419,11 @@ export default function CameraTab({
                 {capturedMedia && (
                   <div className="flex items-center gap-4 w-full">
                     <button onClick={startCamera}
-                      className="flex-1 py-3 text-sm bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all">
+                      className="cursor-pointer flex-1 py-3 text-sm bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all">
                       Yeniden Çek
                     </button>
                     <button onClick={handleSaveMedia} disabled={isUploading}
-                      className="flex-1 py-3 text-sm bg-indigo-500 hover:bg-indigo-400 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-500/20 disabled:opacity-50">
+                      className="cursor-pointer flex-1 py-3 text-sm bg-indigo-500 hover:bg-indigo-400 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-500/20 disabled:opacity-50">
                       {isUploading ? 'Kaydediliyor...' : 'Albüme Ekle'}
                     </button>
                   </div>
