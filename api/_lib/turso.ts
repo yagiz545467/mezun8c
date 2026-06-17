@@ -1,11 +1,12 @@
 import { createClient } from '@libsql/client';
+import { tursoConfig } from './db-config';
 
 let client: ReturnType<typeof createClient> | null = null;
 
 export function getTurso() {
   if (!client) {
-    const url = process.env.TURSO_DATABASE_URL;
-    const authToken = process.env.TURSO_AUTH_TOKEN;
+    const url = process.env.TURSO_DATABASE_URL || tursoConfig.url;
+    const authToken = process.env.TURSO_AUTH_TOKEN || tursoConfig.authToken;
 
     if (!url) {
       throw new Error('TURSO_DATABASE_URL environment variable is not set');
