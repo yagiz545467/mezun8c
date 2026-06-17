@@ -1,18 +1,16 @@
 import express from 'express';
 import cors from 'cors';
-import https from 'https';
 import http from 'http';
 import { randomUUID } from 'crypto';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { writeFile, mkdir } from 'fs/promises';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const MEDIA_DIR = join(__dirname, 'media');
-const CERT_DIR = join(__dirname, 'certs');
-const HTTP_PORT = 3001;
-const HTTPS_PORT = 3443;
+const DIST_DIR = join(__dirname, 'dist');
+const PORT = process.env.PORT || 3001;
+const API_UPSTREAM = 'https://mezun8c.vercel.app';
 
 const app = express();
 
@@ -37,8 +35,7 @@ app.post('/api/upload', async (req, res) => {
     await mkdir(MEDIA_DIR, { recursive: true });
     await writeFile(filepath, Buffer.from(data, 'base64'));
 
-    const proto = req.socket.encrypted ? 'https' : 'http';
-    const url = `${proto}://${req.get('host')}/media/${filename}`;
+    const url = `http://${req.get('host')}/media/${filename}`;
     res.json({ url, filename });
   } catch (err) {
     console.error('Upload error:', err);
@@ -50,24 +47,29 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
 
-const certKeyPath = join(CERT_DIR, 'key.pem');
-const certPath = join(CERT_DIR, 'cert.pem');
-let httpsOpts = null;
-
-if (existsSync(certKeyPath) && existsSync(certPath)) {
-  httpsOpts = { key: readFileSync(certKeyPath), cert: readFileSync(certPath) };
-} else {
-  console.log('SSL sertifikası bulunamadı.');
-  console.log('Önce setup-ssl.ps1 çalıştırın, ya da HTTP kullanmak için:');
-  console.log('  CameraTab.tsx -> VDS_URL = http://212.180.120.242:3001');
-}
-
-http.createServer(app).listen(HTTP_PORT, () => {
-  console.log(`HTTP: http://212.180.120.242:${HTTP_PORT}`);
+app.all('/api/*', async (req, res) => {
+  try {
+    const targetUrl = `${API_UPSTREAM}${req.path}`;
+    const headers = { 'Content-Type': 'application/json' };
+    const body = ['GET', 'HEAD'].includes(req.method) ? undefined : JSON.stringify(req.body);
+    const upstream = await fetch(targetUrl, { method: req.method, headers, body });
+    const data = await upstream.json();
+    res.status(upstream.status).json(data);
+  } catch (err) {
+    console.error('Proxy error:', err.message);
+    res.status(502).json({ error: 'Upstream unavailable' });
+  }
 });
 
-if (httpsOpts) {
-  https.createServer(httpsOpts, app).listen(HTTPS_PORT, () => {
-    console.log(`HTTPS: https://212.180.120.242:${HTTPS_PORT}`);
-  });
-}
+app.use(express.static(DIST_DIR));
+
+app.get('*', (_req, res) => {
+  res.sendFile(join(DIST_DIR, 'index.html'));
+});
+
+http.createServer(app).listen(PORT, () => {
+  console.log(`Sunucu çalışıyor: http://212.180.120.242:${PORT}`);
+  console.log(`Frontend: dist/`);
+  console.log(`Medya: media/`);
+  console.log(`API proxy: ${API_UPSTREAM}`);
+});
