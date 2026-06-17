@@ -289,7 +289,9 @@ export default function App() {
 
     const updatedMemories = [newMemory, ...memories];
     setMemories(updatedMemories);
-    setLocalData('memories', updatedMemories);
+    try {
+      setLocalData('memories', updatedMemories);
+    } catch { /* localStorage might be full, keep in memory */ }
 
     try {
       await createMemory(newMemory);
