@@ -283,7 +283,7 @@ export default function CameraTab({
                 ref={videoRef}
                 autoPlay
                 playsInline
-                muted={mode === 'photo'}
+                muted={true}
                 className={`h-full w-full object-cover ${facingMode === 'user' ? 'scale-x-[-1]' : ''}`}
               />
             )}

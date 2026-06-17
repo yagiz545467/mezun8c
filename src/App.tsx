@@ -13,7 +13,8 @@ import GalleryTab from './components/GalleryTab';
 import AdminPanelTab from './components/AdminPanelTab';
 import { GraduationCap, Sparkles } from 'lucide-react';
 
-const ADMIN_EMAIL = 'unluleyla52@gmail.com';
+const ADMIN_EMAILS = ['unluleyla52@gmail.com', 'duyguneva@gmail.com'];
+const isAdminUser = (email: string) => ADMIN_EMAILS.includes(email);
 
 const DEFAULT_STUDENTS: Student[] = [
   { id: 'std-1', name: 'MİRAÇ HALİM TANRIKULU', gender: 'M' },
@@ -89,9 +90,13 @@ export default function App() {
         getStudents(), getNotes(), getMemories(),
         getSetting('isNotebookPublic'),
       ]);
+      const localM = getLocalData<MemoryMedia[]>('memories', []);
+      const mergedMemories = mergeById(m, localM);
+      const localN = getLocalData<GraduationNote[]>('notes', []);
+      const mergedNotes = mergeById(n, localN);
       setStudents(s);
-      setNotes(n.sort((a, b) => b.createdAt - a.createdAt));
-      setMemories(m.sort((a, b) => b.createdAt - a.createdAt));
+      setNotes(mergedNotes.sort((a, b) => b.createdAt - a.createdAt));
+      setMemories(mergedMemories.sort((a, b) => b.createdAt - a.createdAt));
       setIsNotebookPublic(settingsVal === 'true');
       setIsOnline(true);
     } catch (err) {
@@ -109,6 +114,13 @@ export default function App() {
       setIsLoading(false);
     }
   };
+
+  function mergeById<T extends { id: string }>(api: T[], local: T[]): T[] {
+    const map = new Map<string, T>();
+    for (const item of api) map.set(item.id, item);
+    for (const item of local) map.set(item.id, item);
+    return Array.from(map.values());
+  }
 
   useEffect(() => {
     const hash = window.location.hash;
@@ -280,7 +292,7 @@ export default function App() {
     setLocalData('memories', updatedMemories);
 
     try {
-      if (isOnline) await createMemory(newMemory);
+      await createMemory(newMemory);
     } catch { /* fallback */ }
   };
 
@@ -294,7 +306,7 @@ export default function App() {
     } catch { /* fallback */ }
   };
 
-  const isAdmin = !!user && user.email === ADMIN_EMAIL;
+  const isAdmin = !!user && isAdminUser(user.email);
 
   const stats = {
     totalStudents: students.filter(s => !s.isTeacher).length,
