@@ -95,7 +95,9 @@ export default function App() {
       const mergedMemories = mergeById(m, localM);
       const localN = getLocalData<GraduationNote[]>('notes', []);
       const mergedNotes = mergeById(n, localN);
-      setStudents(s);
+      const localS = getLocalData<Student[]>('students', []);
+      const mergedStudents = mergeById(s, localS);
+      setStudents(mergedStudents);
       setNotes(mergedNotes.sort((a, b) => b.createdAt - a.createdAt));
       setMemories(mergedMemories.sort((a, b) => b.createdAt - a.createdAt));
       setIsNotebookPublic(settingsVal === 'true');
@@ -170,7 +172,7 @@ export default function App() {
         claimedByUid: updated.claimedByUid, isTeacher: updated.isTeacher,
         isApproved: updated.isApproved,
       });
-    } catch { /* fallback */ }
+    } catch (e) { console.warn('syncStudent failed:', e); }
   };
 
   const handleLogin = () => {
@@ -245,7 +247,7 @@ export default function App() {
     setLocalData('isNotebookPublic', isPublic);
     try {
       if (isOnline) await setSetting('isNotebookPublic', String(isPublic));
-    } catch { /* fallback */ }
+    } catch (e) { console.warn('setSetting failed:', e); }
   };
 
   const handleAddNote = async (toStudentId: string, content: string) => {
@@ -264,7 +266,7 @@ export default function App() {
 
     try {
       if (isOnline) await createNote(newNote);
-    } catch { /* fallback */ }
+    } catch (e) { console.warn('createNote failed:', e); }
   };
 
   const handleDeleteNote = async (noteId: string) => {
@@ -274,7 +276,7 @@ export default function App() {
     setLocalData('notes', updatedNotes);
     try {
       if (isOnline) await deleteNote(noteId);
-    } catch { /* fallback */ }
+    } catch (e) { console.warn('deleteNote failed:', e); }
   };
 
   const handleAddMemory = async (mediaUrl: string, mediaType: 'image' | 'video' = 'image', localBase64?: string) => {
@@ -299,7 +301,7 @@ export default function App() {
 
     try {
       await createMemory(newMemory);
-    } catch { /* fallback */ }
+    } catch (e) { console.warn('createMemory failed:', e); }
   };
 
   const handleDeleteMemory = async (memoryId: string) => {
@@ -309,7 +311,7 @@ export default function App() {
     setLocalData('memories', updatedMemories);
     try {
       if (isOnline) await deleteMemory(memoryId);
-    } catch { /* fallback */ }
+    } catch (e) { console.warn('deleteMemory failed:', e); }
   };
 
   const isAdmin = !!user && isAdminUser(user.email);

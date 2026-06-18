@@ -16,8 +16,9 @@ export default async function handler(req, res) {
         ON CONFLICT(id) DO UPDATE SET
           name = COALESCE(?, name), email = COALESCE(?, email),
           photo_url = COALESCE(?, photo_url), gender = COALESCE(?, gender),
-          claimed_by_uid = COALESCE(?, claimed_by_uid),
-          is_teacher = COALESCE(?, is_teacher), is_approved = COALESCE(?, is_approved)`, [
+          claimed_by_uid = ?,
+          is_teacher = COALESCE(?, is_teacher),
+          is_approved = ?`, [
         id, name, email || null, photo_url || null, gender || null,
         claimed_by_uid || null, is_teacher ? 1 : 0, is_approved ? 1 : 0,
         name, email || null, photo_url || null, gender || null,
