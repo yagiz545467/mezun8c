@@ -95,9 +95,7 @@ export default function App() {
       const mergedMemories = mergeById(m, localM);
       const localN = getLocalData<GraduationNote[]>('notes', []);
       const mergedNotes = mergeById(n, localN);
-      const localS = getLocalData<Student[]>('students', []);
-      const mergedStudents = mergeById(s, localS);
-      setStudents(mergedStudents);
+      setStudents(s);
       setNotes(mergedNotes.sort((a, b) => b.createdAt - a.createdAt));
       setMemories(mergedMemories.sort((a, b) => b.createdAt - a.createdAt));
       setIsNotebookPublic(settingsVal === 'true');
