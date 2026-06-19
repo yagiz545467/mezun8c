@@ -15,13 +15,12 @@ interface NotesTabProps {
   onAddNote: (toStudentId: string, content: string) => Promise<void>;
   onDeleteNote: (noteId: string) => Promise<void>;
   onLogin: () => void;
-  timeMachineDate: string;
   isNotebookPublic: boolean;
 }
 
 export default function NotesTab({
   students, notes, currentUserStudent, user, onAddNote, onDeleteNote,
-  onLogin, timeMachineDate, isNotebookPublic,
+  onLogin, isNotebookPublic,
 }: NotesTabProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);

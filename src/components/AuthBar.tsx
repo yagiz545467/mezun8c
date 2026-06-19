@@ -1,7 +1,7 @@
 import { Student } from '../types';
 import {
-  LogIn, LogOut, Sparkles, Shield, Clock, HelpCircle,
-  Home, BookOpen, Camera, Images, ChevronRight, User, X, Check,
+  LogIn, LogOut, Sparkles, Shield,
+  Home, BookOpen, Camera, Images, ChevronRight, User, X,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useState } from 'react';
@@ -15,8 +15,6 @@ interface AuthBarProps {
   onLogout: () => void;
   onClaimStudent: (studentId: string) => void;
   onUnclaimStudent: () => void;
-  timeMachineDate: string;
-  setTimeMachineDate: (date: string) => void;
   activeTab: string;
   setActiveTab: (tab: 'home' | 'notes' | 'camera' | 'gallery' | 'admin') => void;
   isAdmin: boolean;
@@ -31,11 +29,10 @@ const tabs = [
 
 export default function AuthBar({
   user, currentUserStudent, students, onLogin, onLogout,
-  onClaimStudent, onUnclaimStudent, timeMachineDate, setTimeMachineDate,
+  onClaimStudent, onUnclaimStudent,
   activeTab, setActiveTab, isAdmin,
 }: AuthBarProps) {
   const [showClaimModal, setShowClaimModal] = useState(false);
-  const [showTimeHelp, setShowTimeHelp] = useState(false);
 
   const unclaimedStudents = students.filter(s => !s.claimedByUid && !s.isTeacher);
   const unclaimedTeachers = students.filter(s => !s.claimedByUid && s.isTeacher);
@@ -94,24 +91,6 @@ export default function AuthBar({
           </nav>
 
           <div className="flex items-center gap-3">
-              {isAdmin && (
-              <div className="flex items-center gap-1.5 rounded-lg border border-[#1e1e32] bg-[#0f0f1a] px-2.5 py-1">
-                <Clock className="h-3 w-3 text-indigo-400" />
-                <select
-                  value={timeMachineDate}
-                  onChange={(e) => setTimeMachineDate(e.target.value)}
-                  className="bg-transparent font-mono text-[11px] font-semibold text-slate-300 focus:outline-none cursor-pointer"
-                >
-                  <option value="2026-06-16" className="bg-[#0f0f1a] text-slate-300">16.06.2026 (Öncesi)</option>
-                  <option value="2026-06-19" className="bg-[#0f0f1a] text-slate-300">19.06.2026 07:00 (Kamera Açık)</option>
-                  <option value="2026-06-20" className="bg-[#0f0f1a] text-slate-300">19.06.2026 10:00 (Galeri Açık)</option>
-                </select>
-                <button onClick={() => setShowTimeHelp(!showTimeHelp)} className="text-slate-500 hover:text-indigo-400 transition-colors cursor-pointer">
-                  <HelpCircle className="h-3 w-3" />
-                </button>
-              </div>
-            )}
-
             {user ? (
               <div className="flex items-center gap-2">
                 <div className="text-right">
@@ -150,19 +129,6 @@ export default function AuthBar({
           </div>
         </div>
 
-        <AnimatePresence>
-          {showTimeHelp && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="bg-indigo-500/5 border-t border-b border-indigo-500/10 text-indigo-300 text-[11px] py-2 px-6 text-center"
-            >
-            <Clock className="h-3 w-3 inline-block mr-1" />
-            <strong className="text-white">Zaman Makinesi:</strong> Kamera <strong>07:00-10:00</strong> arası açık, galeri <strong>10:00</strong>'da açılır. Test için saati değiştirebilirsiniz.
-            </motion.div>
-          )}
-        </AnimatePresence>
       </header>
 
       {/* Mobile Top Header */}
@@ -213,25 +179,6 @@ export default function AuthBar({
             )}
           </div>
         </div>
-        {isAdmin && (
-          <div className="flex items-center justify-center gap-1.5 px-3 pb-2">
-            <div className="flex items-center gap-1.5 rounded-lg border border-[#1e1e32] bg-[#0f0f1a] px-2.5 py-1">
-              <Clock className="h-3 w-3 text-indigo-400" />
-              <select
-                value={timeMachineDate}
-                onChange={(e) => setTimeMachineDate(e.target.value)}
-                className="bg-transparent font-mono text-[11px] font-semibold text-slate-300 focus:outline-none cursor-pointer"
-              >
-                <option value="2026-06-16" className="bg-[#0f0f1a] text-slate-300">16.06.2026 (Öncesi)</option>
-                <option value="2026-06-19" className="bg-[#0f0f1a] text-slate-300">19.06.2026 07:00 (Kamera Açık)</option>
-                <option value="2026-06-20" className="bg-[#0f0f1a] text-slate-300">19.06.2026 10:00 (Galeri Açık)</option>
-              </select>
-              <button onClick={() => setShowTimeHelp(!showTimeHelp)} className="text-slate-500 hover:text-indigo-400 transition-colors cursor-pointer">
-                <HelpCircle className="h-3 w-3" />
-              </button>
-            </div>
-          </div>
-        )}
       </header>
 
       {/* Mobile Bottom Navigation */}

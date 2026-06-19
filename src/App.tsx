@@ -80,7 +80,6 @@ export default function App() {
   const [memories, setMemories] = useState<MemoryMedia[]>([]);
   const [isNotebookPublic, setIsNotebookPublic] = useState(false);
   const [activeTab, setActiveTab] = useState<'home' | 'notes' | 'camera' | 'gallery' | 'admin'>('home');
-  const [timeMachineDate, setTimeMachineDate] = useState('2026-06-16');
   const [isLoading, setIsLoading] = useState(true);
   const [isOnline, setIsOnline] = useState(false);
 
@@ -333,8 +332,6 @@ export default function App() {
         onLogout={handleLogout}
         onClaimStudent={handleClaimStudent}
         onUnclaimStudent={handleUnclaimStudent}
-        timeMachineDate={timeMachineDate}
-        setTimeMachineDate={setTimeMachineDate}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         isAdmin={isAdmin}
@@ -352,26 +349,26 @@ export default function App() {
         ) : (
           <div>
             {activeTab === 'home' && (
-              <HomeTab stats={stats} timeMachineDate={timeMachineDate} setActiveTab={setActiveTab} user={user} onLogin={handleLogin} />
+              <HomeTab stats={stats} setActiveTab={setActiveTab} user={user} onLogin={handleLogin} />
             )}
             {activeTab === 'notes' && (
               <NotesTab
                 students={students} notes={notes} currentUserStudent={currentUserStudent}
                 user={user} onAddNote={handleAddNote} onDeleteNote={handleDeleteNote}
-                onLogin={handleLogin} timeMachineDate={timeMachineDate} isNotebookPublic={isNotebookPublic}
+                onLogin={handleLogin} isNotebookPublic={isNotebookPublic}
               />
             )}
             {activeTab === 'camera' && (
               <CameraTab
                 currentUserStudent={currentUserStudent} user={user}
-                timeMachineDate={timeMachineDate} onAddMemory={handleAddMemory}
+                onAddMemory={handleAddMemory}
                 onLogin={handleLogin} setActiveTab={setActiveTab}
               />
             )}
             {activeTab === 'gallery' && (
               <GalleryTab
                 memories={memories} currentUserStudent={currentUserStudent}
-                user={user} timeMachineDate={timeMachineDate}
+                user={user}
                 onDeleteMemory={handleDeleteMemory} setActiveTab={setActiveTab}
               />
             )}

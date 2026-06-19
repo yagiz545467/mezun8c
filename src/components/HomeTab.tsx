@@ -3,7 +3,6 @@ import { useState, useEffect, useRef } from 'react';
 
 interface HomeTabProps {
   stats: { totalStudents: number; totalNotes: number; totalMemories: number };
-  timeMachineDate: string;
   setActiveTab: (tab: 'home' | 'notes' | 'camera' | 'gallery') => void;
   user: any;
   onLogin: () => void;
@@ -24,22 +23,20 @@ function fmt(ms: number) {
   return r.trim();
 }
 
-function Countdown({ target, label, timeMachineDate }: { target: Date; label: string; timeMachineDate: string }) {
+function Countdown({ target, label }: { target: Date; label: string }) {
   const [text, setText] = useState('');
   const raf = useRef<number>(0);
 
   useEffect(() => {
     const tick = () => {
-      let virtualNow = new Date();
-      if (timeMachineDate === '2026-06-19') virtualNow = new Date(2026, 5, 19, 8, 0, 0);
-      else if (timeMachineDate === '2026-06-20') virtualNow = new Date(2026, 5, 19, 11, 0, 0);
-      const diff = target.getTime() - virtualNow.getTime();
+      const now = new Date();
+      const diff = target.getTime() - now.getTime();
       setText(diff <= 0 ? label : fmt(diff));
       raf.current = requestAnimationFrame(tick);
     };
     raf.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf.current);
-  }, [timeMachineDate, target, label]);
+  }, [target, label]);
 
   return <span>{text}</span>;
 }
@@ -47,7 +44,7 @@ function Countdown({ target, label, timeMachineDate }: { target: Date; label: st
 const cameraOpen = new Date(2026, 5, 19, 7, 0, 0);
 const galleryOpen = new Date(2026, 5, 19, 10, 0, 0);
 
-export default function HomeTab({ stats, timeMachineDate, setActiveTab, user, onLogin }: HomeTabProps) {
+export default function HomeTab({ stats, setActiveTab, user, onLogin }: HomeTabProps) {
 
   return (
     <div className="space-y-6 py-2 md:py-4">
@@ -136,7 +133,7 @@ export default function HomeTab({ stats, timeMachineDate, setActiveTab, user, on
               <Clock className="h-3 w-3" /> Açılışa Kalan:
             </p>
             <p className="font-mono text-sm tracking-wide text-indigo-300 font-bold bg-[#0a0a14] p-2 text-center rounded-lg border border-indigo-500/10">
-              <Countdown target={cameraOpen} label="Kamera Açık!" timeMachineDate={timeMachineDate} />
+              <Countdown target={cameraOpen} label="Kamera Açık!" />
             </p>
           </div>
         </div>
@@ -155,7 +152,7 @@ export default function HomeTab({ stats, timeMachineDate, setActiveTab, user, on
               <Clock className="h-3 w-3" /> Galeri Açılış:
             </p>
             <p className="font-mono text-sm tracking-wide text-violet-300 font-bold bg-[#0a0a14] p-2 text-center rounded-lg border border-violet-500/10">
-              <Countdown target={galleryOpen} label="Galeri Açık!" timeMachineDate={timeMachineDate} />
+              <Countdown target={galleryOpen} label="Galeri Açık!" />
             </p>
           </div>
         </div>

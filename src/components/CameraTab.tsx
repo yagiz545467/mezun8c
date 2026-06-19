@@ -8,16 +8,15 @@ const VDS_URL = import.meta.env.VITE_VDS_URL || 'http://212.180.120.242:3001';
 interface CameraTabProps {
   currentUserStudent: Student | null;
   user: any;
-  timeMachineDate: string;
   onAddMemory: (mediaUrl: string, mediaType: 'image' | 'video', localBase64?: string) => Promise<void>;
   onLogin: () => void;
   setActiveTab: (tab: 'home' | 'notes' | 'camera' | 'gallery') => void;
 }
 
 export default function CameraTab({
-  currentUserStudent, user, timeMachineDate, onAddMemory, onLogin, setActiveTab,
+  currentUserStudent, user, onAddMemory, onLogin, setActiveTab,
 }: CameraTabProps) {
-  const isUnlockedDay = timeMachineDate === '2026-06-19';
+  const isUnlockedDay = new Date() >= new Date(2026, 5, 19, 7, 0, 0);
 
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [cameraActive, setCameraActive] = useState(false);

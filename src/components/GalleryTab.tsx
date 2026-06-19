@@ -8,15 +8,14 @@ interface GalleryTabProps {
   memories: MemoryMedia[];
   currentUserStudent: Student | null;
   user: any;
-  timeMachineDate: string;
   onDeleteMemory: (memoryId: string) => Promise<void>;
   setActiveTab: (tab: 'home' | 'notes' | 'camera' | 'gallery') => void;
 }
 
 export default function GalleryTab({
-  memories, currentUserStudent, user, timeMachineDate, onDeleteMemory, setActiveTab,
+  memories, currentUserStudent, user, onDeleteMemory, setActiveTab,
 }: GalleryTabProps) {
-  const isUnlockedDay = timeMachineDate === '2026-06-20';
+  const isUnlockedDay = new Date() >= new Date(2026, 5, 19, 10, 0, 0);
   const [activeFilter, setActiveFilter] = useState<'all' | 'mine'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPhoto, setSelectedPhoto] = useState<MemoryMedia | null>(null);
